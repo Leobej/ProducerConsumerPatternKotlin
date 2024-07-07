@@ -5,8 +5,12 @@ import java.util.concurrent.locks.ReentrantLock
 
 // Here I generate data items and add them to the shared queue
 
-class Producer<T>(private val queue: Queue<DataItem>, private val lock: ReentrantLock, private val range: Int) :
-    Runnable {
+class Producer<T>(
+    private val queue: Queue<DataItem>,
+    private val lock: ReentrantLock,
+    private val range: Int,
+    private val consumers: List<Consumer>
+) : Runnable {
     override fun run() {
         repeat(range) {
             val data = when ((1..3).random()) {
@@ -22,6 +26,15 @@ class Producer<T>(private val queue: Queue<DataItem>, private val lock: Reentran
                 lock.unlock()
             }
             Thread.sleep(1000)
+        }
+
+        lock.lock()
+        try {
+            for (consumer in consumers) {
+                queue.offer(DataItem("End", null))
+            }
+        } finally {
+            lock.unlock()
         }
     }
 }

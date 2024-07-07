@@ -10,10 +10,8 @@ class Main
 fun main(args: Array<String>) {
     val queue: Queue<DataItem> = LinkedList()
     val lock = ReentrantLock()
-    val producer = Producer<DataItem>(queue, lock, 20)
-
-    val numConsumers = 3
-    val consumers = List(numConsumers) { Consumer(queue, lock, it + 1) }
+    val consumers = List(3) { Consumer(queue, lock, it + 1) }
+    val producer = Producer<DataItem>(queue, lock, 20, consumers)
 
     val producerThread = Thread(producer)
     val consumerThreads = consumers.map { Thread(it) }
@@ -26,6 +24,3 @@ fun main(args: Array<String>) {
 
     println("All data processed!")
 }
-
-
-
